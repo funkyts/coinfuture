@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코인 선물거래 생존 확률 테스트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #0f0f23;
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 웰컴 페이지 */
+        .welcome-page {
+            padding: 40px 24px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .warning-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .main-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            line-height: 1.3;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+
+        .sub-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #ef4444;
+        }
+
+        .reality-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+
+        .reality-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            font-size: 15px;
+            color: #fca5a5;
+        }
+
+        .reality-item::before {
+            content: "⚠️";
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 32px 0;
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #cbd5e1;
+            margin-top: 4px;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(239, 68, 68, 0.5);
+        }
+
+        /* 질문 페이지 */
+        .question-page {
+            display: none;
+            padding: 24px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 3px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .question-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .question-number {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .question-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .option-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+
+        .option-button:hover {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            transform: translateX(4px);
+        }
+
+        .option-button.selected {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fff;
+        }
+
+        .next-button {
+            width: 100%;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .next-button.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .next-button.active:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* 결과 페이지 */
+        .result-page {
+            display: none;
+            padding: 24px;
+            padding-bottom: 120px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .result-subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .survival-gauge {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 32px auto;
+        }
+
+        .gauge-circle {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(239, 68, 68, 0.2);
+            stroke-width: 20;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 20;
+            stroke-linecap: round;
+            stroke-dasharray: 565;
+            stroke-dashoffset: 565;
+            animation: gaugeAnimation 2s ease-out forwards;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        @keyframes gaugeAnimation {
+            to {
+                stroke-dashoffset: calc(565 - (565 * var(--progress)) / 100);
+            }
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-percentage {
+            font-size: 48px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .gauge-label {
+            font-size: 16px;
+            color: #94a3b8;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            text-align: center;
+        }
+
+        .metric-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .warning-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid #ef4444;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .warning-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fca5a5;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .guide-benefits {
+            list-style: none;
+            margin: 16px 0;
+        }
+
+        .guide-benefits li {
+            padding: 8px 0;
+            color: #e2e8f0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .guide-benefits li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        /* Floating CTA */
+        .floating-cta {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: linear-gradient(to top, rgba(15, 15, 35, 0.98) 80%, transparent);
+            padding: 16px 24px 24px;
+            z-index: 1000;
+        }
+
+        .floating-button {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .floating-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(239, 68, 68, 0.6);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* 반응형 */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px;
+            }
+            
+            .main-title {
+                font-size: 32px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 웰컴 페이지 -->
+        <div class="welcome-page" id="welcome-page">
+            <div class="warning-icon">⚠️</div>
+            <h1 class="main-title">코인 선물거래로<br>일확천금?</h1>
+            <p class="sub-title">나의 생존 확률부터 체크하세요</p>
+            
+            <div class="reality-box">
+                <div class="reality-item">선물거래 99%가 1년 내 청산</div>
+                <div class="reality-item">10배 레버리지 = 10% 하락 시 파산</div>
+                <div class="reality-item">수수료만으로도 월 -5% 손실</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">1%</div>
+                    <div class="stat-label">1년 생존률</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">3일</div>
+                    <div class="stat-label">평균 청산일</div>
+                </div>
+            </div>
+
+            <button class="cta-button" onclick="startTest()">
+                🔍 내 생존 확률 확인하기
+            </button>
+        </div>
+
+        <!-- 질문 페이지 -->
+        <div class="question-page" id="question-page">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="question-header">
+                <div class="question-number" id="question-number">질문 1 / 10</div>
+                <h2 class="question-title" id="question-title"></h2>
+            </div>
+
+            <div class="options" id="options"></div>
+
+            <button class="next-button" id="next-button" onclick="nextQuestion()">
+                다음 질문
+            </button>
+        </div>
+
+        <!-- 결과 페이지 -->
+        <div class="result-page" id="result-page">
+            <div class="result-header">
+                <h2 class="result-title">당신의 생존 확률</h2>
+                <p class="result-subtitle">선물거래 시작 전 필수 체크 완료</p>
+            </div>
+
+            <div class="survival-gauge">
+                <svg class="gauge-circle" width="200" height="200">
+                    <circle class="gauge-bg" cx="100" cy="100" r="90"></circle>
+                    <circle class="gauge-fill" id="gauge-fill" cx="100" cy="100" r="90" style="--progress: 0"></circle>
+                </svg>
+                <div class="gauge-text">
+                    <span class="gauge-percentage" id="survival-percentage">0%</span>
+                    <span class="gauge-label">생존 확률</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">⚡</div>
+                    <div class="metric-value" id="risk-level">높음</div>
+                    <div class="metric-label">리스크 레벨</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">💀</div>
+                    <div class="metric-value" id="liquidation-risk">90%</div>
+                    <div class="metric-label">청산 위험도</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">📉</div>
+                    <div class="metric-value" id="loss-probability">높음</div>
+                    <div class="metric-label">손실 가능성</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">⏱️</div>
+                    <div class="metric-value" id="survival-days">3일</div>
+                    <div class="metric-label">예상 생존기간</div>
+                </div>
+            </div>
+
+            <div class="warning-message">
+                <h3 class="warning-title">🚨 청산 당하지 않으려면?</h3>
+                <p style="text-align: center; margin-bottom: 16px; color: #fca5a5; font-weight: 600;">
+                    선물거래 최소한의 지식부터<br>
+                    🔥 <strong>무료로 확인하세요</strong>
+                </p>
+                
+                <ul class="guide-benefits">
+                    <li>레버리지별 청산 가격 계산법</li>
+                    <li>수수료 누적으로 손실 보는 이유</li>
+                    <li>롱/숏 포지션 진입 타이밍</li>
+                    <li>99% 실패하는 심리적 함정</li>
+                    <li>자금관리 5가지 황금률</li>
+                </ul>
+            </div>
+
+            <!-- Floating CTA -->
+            <div class="floating-cta">
+                <button class="floating-button" onclick="goToGuide()">
+                    <span class="pulse-dot"></span>
+                    <span>청산 방어 가이드 무료로 보기</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                title: "거래소 수수료 0.1%가 아깝다고 생각하시나요?",
+                options: [
+                    { text: "아니다, 거래비용은 반드시 계산해야 한다", score: 10 },
+                    { text: "그렇다, 수수료 없는 곳을 찾아야 한다", score: 0 }
+                ]
+            },
+            {
+                title: "선물거래(레버리지)의 가장 큰 위험은?",
+                options: [
+                    { text: "청산으로 원금을 전부 잃을 수 있다", score: 10 },
+                    { text: "수익이 줄어든다 / 잘 모르겠다", score: 0 }
+                ]
+            },
+            {
+                title: "하루 단타로 현실적인 수익률은?",
+                options: [
+                    { text: "1-3% 정도, 그것도 매일은 힘들다", score: 10 },
+                    { text: "10% 이상은 충분히 가능하다", score: 0 }
+                ]
+            },
+            {
+                title: "지지선, 저항선, RSI 같은 기술적 지표를 알고 계신가요?",
+                options: [
+                    { text: "네, 기본적인 분석은 할 수 있다", score: 10 },
+                    { text: "아니다, 감으로 거래한다", score: 0 }
+                ]
+            },
+            {
+                title: "제대로 된 단타를 하려면 하루에 몇 시간 필요할까요?",
+                options: [
+                    { text: "최소 4-6시간은 차트를 봐야 한다", score: 10 },
+                    { text: "1-2시간, 또는 틈틈이 보면 된다", score: 0 }
+                ]
+            },
+            {
+                title: "한 번의 거래에 총 자금의 몇 %를 투입하시겠어요?",
+                options: [
+                    { text: "5-10% 이하, 절대 올인하지 않는다", score: 10 },
+                    { text: "30% 이상, 큰돈을 걸어야 큰 수익", score: 0 }
+                ]
+            },
+            {
+                title: "3번 연속 손실이 나면 어떻게 하시겠어요?",
+                options: [
+                    { text: "거래를 중단하고 전략을 재점검한다", score: 10 },
+                    { text: "더 큰돈을 걸어서 만회한다", score: 0 }
+                ]
+            },
+            {
+                title: "갑자기 30% 떨어지는 상황에서 냉정할 수 있나요?",
+                options: [
+                    { text: "미리 정한 손절선에 따라 행동한다", score: 10 },
+                    { text: "패닉하거나 급하게 매도한다", score: 0 }
+                ]
+            },
+            {
+                title: "처음 선물거래 한다면 몇 배 레버리지가 적당할까요?",
+                options: [
+                    { text: "2-3배, 또는 선물거래 안 한다", score: 10 },
+                    { text: "10배 이상, 높을수록 수익도 크다", score: 0 }
+                ]
+            },
+            {
+                title: "한 달 단타로 얼마나 벌 수 있다고 생각하시나요?",
+                options: [
+                    { text: "원금의 10-20%, 손실 가능성도 크다", score: 10 },
+                    { text: "원금의 2배 이상, 실력만 있으면 된다", score: 0 }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let totalScore = 0;
+
+        function startTest() {
+            document.getElementById('welcome-page').style.display = 'none';
+            document.getElementById('question-page').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            
+            document.getElementById('question-number').textContent = `질문 ${currentQuestion + 1} / ${questions.length}`;
+            document.getElementById('question-title').textContent = question.title;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option.text;
+                button.onclick = () => selectOption(index, button);
+                optionsContainer.appendChild(button);
+            });
+
+            updateProgress();
+            
+            const nextButton = document.getElementById('next-button');
+            nextButton.classList.remove('active');
+            nextButton.textContent = currentQuestion === questions.length - 1 ? '결과 보기' : '다음 질문';
+        }
+
+        function selectOption(optionIndex, button) {
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            button.classList.add('selected');
+            
+            answers[currentQuestion] = {
+                optionIndex: optionIndex,
+                score: questions[currentQuestion].options[optionIndex].score
+            };
+            
+            document.getElementById('next-button').classList.add('active');
+        }
+
+        function nextQuestion() {
+            if (!answers[currentQuestion]) return;
+            
+            totalScore += answers[currentQuestion].score;
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function showResult() {
+            document.getElementById('question-page').style.display = 'none';
+            document.getElementById('result-page').style.display = 'block';
+            
+            const maxScore = questions.length * 10;
+            const survivalRate = Math.round((totalScore / maxScore) * 100);
+            
+            // 색상 결정
+            let gaugeColor, riskLevel, lossProbability, survivalDays;
+            
+            if (survivalRate >= 80) {
+                gaugeColor = '#10b981';
+                riskLevel = '낮음';
+                lossProbability = '낮음';
+                survivalDays = '1개월+';
+            } else if (survivalRate >= 60) {
+                gaugeColor = '#f59e0b';
+                riskLevel = '보통';
+                lossProbability = '보통';
+                survivalDays = '2주';
+            } else if (survivalRate >= 40) {
+                gaugeColor = '#f97316';
+                riskLevel = '높음';
+                lossProbability = '높음';
+                survivalDays = '1주';
+            } else {
+                gaugeColor = '#ef4444';
+                riskLevel = '매우 높음';
+                lossProbability = '매우 높음';
+                survivalDays = '3일';
+            }
+            
+            // 청산 위험도 (생존률의 반대)
+            const liquidationRisk = (100 - survivalRate) + '%';
+            
+            // 결과 표시
+            document.getElementById('survival-percentage').textContent = survivalRate + '%';
+            document.getElementById('survival-percentage').style.color = gaugeColor;
+            
+            document.getElementById('risk-level').textContent = riskLevel;
+            document.getElementById('risk-level').style.color = gaugeColor;
+            
+            document.getElementById('liquidation-risk').textContent = liquidationRisk;
+            document.getElementById('loss-probability').textContent = lossProbability;
+            document.getElementById('survival-days').textContent = survivalDays;
+            
+            // 게이지 애니메이션
+            const gaugeFill = document.getElementById('gauge-fill');
+            gaugeFill.style.setProperty('--progress', survivalRate);
+            gaugeFill.style.stroke = gaugeColor;
+        }
+
+        function goToGuide() {
+            window.open('https://financekorean.com/coinfuture', '_blank');
+        }
+    </script>
+</body>
+</html>
